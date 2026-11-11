@@ -1,0 +1,3 @@
+<odoo>
+  <function model="res.company" name="_ms_migrate_native_freight"/>
+</odoo>

@@ -1,0 +1,59 @@
+<odoo>
+  <record id="paperformat_megasanj_desktop" model="report.paperformat">
+    <field name="name">مگاسنج - چاپ استاندارد اودو</field><field name="format">A4</field>
+    <field name="orientation">Portrait</field><field name="margin_top">10</field><field name="margin_bottom">10</field>
+    <field name="margin_left">10</field><field name="margin_right">10</field><field name="header_line" eval="False"/>
+    <field name="header_spacing">0</field><field name="dpi">90</field>
+  </record>
+  <template id="native_report_style"><style>
+    .ms-native {direction:rtl;text-align:right;font-family:'DejaVu Sans',sans-serif;font-size:11px;line-height:1.8;color:#172b46;}
+    .ms-native h2{font-size:20px;margin:0 0 8px;color:#173f74;}
+    .ms-native table{width:100%;border-collapse:collapse;table-layout:fixed;direction:rtl;margin:8px 0 14px;}
+    .ms-native td,.ms-native th{border:1px solid #b9c9dc;padding:7px 9px;text-align:right;vertical-align:middle;word-wrap:break-word;}
+    .ms-native th{background:#edf2f7;color:#173f74;} .ms-native .ms-heading td{border:0;padding:0 0 10px;}
+    .ms-native .ms-label{font-size:10px;color:#52677f;} .ms-native .ms-value{font-weight:bold;}
+    .ms-native .ms-section{font-size:13px;font-weight:bold;background:#edf2f7;padding:6px 9px;clear:both;}
+    .ms-native .ms-statement{border:1px solid #b9c9dc;padding:12px;line-height:2.1;text-align:right;}
+    .ms-native .ms-sign td{height:85px;vertical-align:top;text-align:center;}
+    .ms-native tr,.ms-native .ms-statement{page-break-inside:avoid;} .ms-native .ms-statement div{direction:ltr;text-align:right;unicode-bidi:embed;line-height:23px;min-height:23px;white-space:nowrap;} .ms-native .ms-reason-line{direction:ltr;text-align:right;unicode-bidi:embed;line-height:18px;min-height:18px;white-space:nowrap;}
+    .ms-native .ms-number{direction:ltr;unicode-bidi:embed;display:inline-block;line-height:normal;} .ms-native .ms-ltr{direction:ltr;unicode-bidi:embed;display:inline-block;}
+  </style></template>
+  <record id="action_report_document" model="ir.actions.report"><field name="name">سند باسکول مگاسنج</field><field name="model">megasanj.document</field><field name="report_type">qweb-pdf</field><field name="report_name">megasanj.report_document</field><field name="binding_model_id" ref="model_megasanj_document"/><field name="paperformat_id" ref="paperformat_megasanj_desktop"/><field name="print_report_name">object.name</field></record>
+  <record id="action_report_discrepancy" model="ir.actions.report"><field name="name">صورت‌جلسه عدم تطابق وزن</field><field name="model">megasanj.discrepancy</field><field name="report_type">qweb-pdf</field><field name="report_name">megasanj.report_discrepancy</field><field name="binding_model_id" ref="model_megasanj_discrepancy"/><field name="paperformat_id" ref="paperformat_megasanj_desktop"/><field name="print_report_name">object.name</field></record>
+  <template id="report_document"><t t-call="web.basic_layout"><t t-foreach="docs" t-as="o">
+    <t t-set="d" t-value="o._ms_report_data()"/><t t-call="megasanj.native_report_style"/>
+    <div class="page ms-native" dir="rtl">
+      <table class="ms-heading"><tr><td style="width:75%"><h2>سند باسکول مگاسنج</h2><div><span class="ms-ltr" t-field="o.name"/></div><div>شرکت <span t-field="o.company_id.name"/> · <span t-out="d['created']"/></div></td><td style="width:25%;text-align:left"><img src="/megasanj/static/report/logo.png" alt="مگاسنج" style="width:64px;height:64px;"/></td></tr></table>
+      <div class="ms-section">مشخصات سند و حمل</div>
+      <table><tr><td><span class="ms-label">بارنامه</span><br/><span t-out="d['waybill']"/></td><td><span class="ms-label">سفارش خرید</span><br/><span t-out="d['purchase']"/></td><td><span class="ms-label">نوع محموله</span><br/><span t-out="d['material']"/></td></tr>
+      <tr><td><span class="ms-label">راننده</span><br/><span t-out="d['driver']"/></td><td><span class="ms-label">شماره همراه</span><br/><span class="ms-ltr" t-out="d['phone']"/></td><td><span class="ms-label">پلاک</span><br/><span t-out="d['plate']"/></td></tr>
+      <tr><td><span class="ms-label">تأمین‌کننده</span><br/><span t-out="d['supplier']"/></td><td><span class="ms-label">شناسه ملی تأمین‌کننده</span><br/><span t-out="d['supplier_vat']"/></td><td><span class="ms-label">تلفن تأمین‌کننده</span><br/><span t-out="d['supplier_phone']"/></td></tr>
+      <tr><td><span class="ms-label">مبدأ</span><br/><span t-out="d['origin']"/></td><td><span class="ms-label">محل مبدأ انبار</span><br/><span t-out="o.source_id.display_name or '—'"/></td><td><span class="ms-label">محل مقصد انبار</span><br/><span t-out="o.destination_id.display_name or '—'"/></td></tr>
+      <tr><td><span class="ms-label">نوع گردش</span><br/><span t-out="d['movement']"/></td><td><span class="ms-label">گردش انبار</span><br/><span t-out="o.picking_id.name or '—'"/></td><td><span class="ms-label">سفارش تولید</span><br/><span t-out="o.production_id.name or '—'"/></td></tr></table>
+      <div class="ms-section">اوزان محموله - همه وزن‌ها بر حسب کیلوگرم</div>
+      <table><tr><th>وزن پر</th><th>وزن خالی</th><th>خالص توزین</th><th>پذیرفته‌شده</th></tr><tr><td t-out="d['gross']"/><td t-out="d['tare']"/><td t-out="d['net']"/><td t-out="d['accepted']"/></tr>
+      <tr><th>وزن مبدأ</th><th>مبنای مقایسه مقصد</th><th>افت</th><th>برگشتی</th></tr><tr><td t-out="d['origin_weight']"/><td t-out="d['comparison']"/><td t-out="d['loss']"/><td t-out="d['rejected']"/></tr></table>
+      <div class="ms-section">ریز توزین‌ها</div>
+      <table><tr><th style="width:13%">مرحله</th><th style="width:14%">وزن</th><th style="width:14%">منبع</th><th style="width:22%">زمان ثبت - ایران</th><th style="width:37%">علت ثبت دستی</th></tr><tr t-foreach="d['weighings']" t-as="w"><td t-out="w['kind']"/><td t-out="w['weight']"/><td t-out="w['source']"/><td><span t-out="w['at'].split(' ')[0]"/><br/><span t-out="w['at'].split(' ')[-1] if ' ' in w['at'] else ''"/></td><td><div class="ms-reason-line" t-foreach="w['reason_lines']" t-as="reason_line" t-out="reason_line"/></td></tr></table>
+      <div class="ms-section">اقلام پذیرفته‌شده</div>
+      <table><tr><th>کالا</th><th>درصد</th><th>وزن - کیلوگرم</th></tr><tr t-foreach="d['lines']" t-as="line"><td t-out="line['name']"/><td t-out="line['percent']"/><td t-out="line['weight']"/></tr></table>
+      <table><tr><td>ورود خودرو: <span t-out="d['entry']"/></td><td>خروج خودرو: <span t-out="d['exit']"/></td></tr><tr><td>کنترل کیفیت: <span t-out="o.quality_id.ms_code or '—'"/></td><td>وضعیت سند: <span t-out="d['state']"/></td></tr></table>
+      <p t-if="o.weight_note" t-field="o.weight_note"/><p>توضیحات:</p><div t-foreach="d['note_lines']" t-as="note_line" t-out="note_line"/>
+      <table class="ms-sign"><tr><td>امضا و اثر انگشت راننده<br/><span t-out="d['driver']"/></td><td>مهر و امضای مسئول باسکول<br/><img src="/megasanj/static/src/img/odoo-origin-stamp.png" style="width:95px;height:auto;" alt="مهر مگاسنج"/></td></tr></table>
+    </div>
+  </t></t></template>
+  <template id="report_discrepancy"><t t-call="web.basic_layout"><t t-foreach="docs" t-as="o">
+    <t t-set="d" t-value="o._ms_report_data()"/><t t-call="megasanj.native_report_style"/>
+    <div class="page ms-native" dir="rtl">
+      <table class="ms-heading"><tr><td style="width:75%"><h2>صورت‌جلسه رسمی عدم تطابق وزن</h2><span class="ms-ltr" t-field="o.name"/><br/>شرکت <span t-field="o.company_id.name"/> · <span t-out="d['created']"/></td><td style="width:25%;text-align:left"><img src="/megasanj/static/report/logo.png" style="width:64px;height:64px;" alt="مگاسنج"/></td></tr></table>
+      <div class="ms-section">مشخصات راننده و محموله</div>
+      <table><tr><td><div class="ms-label">راننده</div><span t-out="d['driver']"/></td><td><div class="ms-label">شماره ملی</div><span t-out="d['national']"/></td></tr><tr><td><div class="ms-label">شماره همراه</div><span class="ms-ltr" t-out="d['phone']"/></td><td><div class="ms-label">پلاک</div><span t-out="d['plate']"/></td></tr>
+      <tr><td><div class="ms-label">بارنامه</div><span t-out="d['waybill']"/></td><td><div class="ms-label">سند باسکول</div><span class="ms-ltr" t-field="o.document_id.name"/></td></tr><tr><td><div class="ms-label">تأمین‌کننده</div><span t-out="d['supplier']"/></td><td><div class="ms-label">سفارش خرید</div><span t-out="d['purchase']"/></td></tr><tr><td><div class="ms-label">نوع محموله</div><span t-out="d['material']"/></td><td><div class="ms-label">مبدأ</div><span t-out="d['origin']"/></td></tr></table>
+      <div class="ms-section">مقایسه اوزان - کیلوگرم</div>
+      <table><tr><th>وزن مبدأ</th><th>وزن مقصد</th><th>کسری</th><th>اضافه‌وزن</th><th>تلرانس</th><th>جبران مقرر</th></tr><tr><td t-out="d['origin_weight']"/><td t-out="d['destination_weight']"/><td t-out="d['shortage']"/><td t-out="d['surplus']"/><td t-out="d['tolerance']"/><td t-out="d['penalty']"/></tr></table>
+      <div class="ms-section">متن صورت‌جلسه</div><div class="ms-statement"><t t-foreach="o._ms_statement_lines()" t-as="statement_line"><div t-out="statement_line"/></t></div>
+      <table><tr><td><div class="ms-label">رسیدگی‌کننده</div><span t-out="d['reviewer']"/></td><td><div class="ms-label">تاریخ رسیدگی</div><span t-out="d['reviewed']"/></td></tr></table>
+      <table class="ms-sign"><tr><td>نام، امضا و اثر انگشت راننده<br/><span t-out="d['driver']"/></td><td>نام و امضای مسئول ثبت سند<br/><span t-out="d['registrar']"/><br/><img src="/megasanj/static/src/img/odoo-origin-stamp.png" style="width:95px;height:auto;" alt="مهر مگاسنج"/></td></tr></table>
+    </div>
+  </t></t></template>
+</odoo>

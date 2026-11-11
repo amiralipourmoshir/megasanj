@@ -1,0 +1,625 @@
+<odoo>
+  <record id="policy_form" model="ir.ui.view">
+    <field name="name">megasanj.policy.form</field>
+    <field name="model">megasanj.policy</field>
+    <field name="arch" type="xml">
+      <form string="سیاست پذیرش محموله">
+        <header>
+          <button name="action_publish" type="object" string="انتشار نسخه" class="btn-primary" invisible="state != 'draft'" />
+          <field name="state" widget="statusbar" />
+        </header>
+        <sheet>
+          <group readonly="state == 'published'">
+            <field name="category_id" />
+            <field name="version" />
+            <field name="calculator" />
+            <field name="tolerance_kg" />
+            <field name="quality_enabled" />
+            <field name="quality_required" />
+            <field name="detect_surplus" />
+            <field name="inventory_requires_discrepancy_closed" />
+            <field name="allow_direct_production" />
+          </group>
+          <div role="status" class="alert alert-info">سیاست منتشرشده ثابت است. تغییر قواعد با نسخه جدید روی عملیات بعدی اعمال می‌شود.</div>
+        </sheet>
+      </form>
+    </field>
+  </record>
+  <record id="policy_list" model="ir.ui.view">
+    <field name="name">megasanj.policy.list</field>
+    <field name="model">megasanj.policy</field>
+    <field name="arch" type="xml">
+      <list>
+        <field name="category_id" />
+        <field name="version" />
+        <field name="calculator" />
+        <field name="quality_required" />
+        <field name="tolerance_kg" />
+        <field name="state" />
+      </list>
+    </field>
+  </record>
+  <record id="waybill_list" model="ir.ui.view">
+    <field name="name">megasanj.waybill.list</field>
+    <field name="model">megasanj.waybill</field>
+    <field name="arch" type="xml">
+      <list decoration-muted="state == 'cancelled'">
+        <field name="name" />
+        <field name="picking_id" />
+        <field name="category_id" />
+        <field name="partner_id" />
+        <field name="driver_name" />
+        <field name="trailer_plate" />
+        <field name="queue_day" />
+        <field name="queue_number" />
+        <field name="gate_state" />
+        <field name="state" />
+      </list>
+    </field>
+  </record>
+  <record id="waybill_form" model="ir.ui.view">
+    <field name="name">megasanj.waybill.form</field>
+    <field name="model">megasanj.waybill</field>
+    <field name="arch" type="xml">
+      <form string="بارنامه محموله">
+        <header>
+          <button name="action_call" type="object" string="فراخوان" groups="megasanj.group_gate" invisible="gate_state != 'waiting'" />
+          <button name="action_enter" type="object" string="ثبت ورود" groups="megasanj.group_gate" invisible="gate_state != 'ready'" />
+          <button name="action_exit" type="object" string="مجوز خروج و ثبت خروج" class="btn-primary" groups="megasanj.group_gate" invisible="gate_state != 'inside'" />
+          <field name="gate_state" widget="statusbar" />
+        </header>
+        <sheet>
+          <h1>
+            <field name="name" />
+          </h1>
+          <group>
+            <group>
+              <field name="company_id" groups="base.group_multi_company" />
+              <field name="picking_id" readonly="state == 'used'" />
+              <field name="purchase_line_id" domain="[('order_id', '=', parent_purchase_id)]" readonly="state == 'used'" />
+              <field name="parent_purchase_id" readonly="1" />
+              <field name="partner_id" />
+              <field name="category_id" />
+              <field name="policy_id" />
+              <field name="state" readonly="1" />
+            </group>
+            <group>
+              <field name="driver_name" readonly="state == 'used'" />
+              <field name="driver_phone" readonly="state == 'used'" />
+              <field name="driver_partner_id" readonly="1" />
+              <field name="trailer_plate" readonly="state == 'used'" />
+              <field name="origin_province" />
+              <field name="origin_city" />
+              <field name="origin_net_weight_kg" />
+              <field name="no_origin_weighbridge" />
+              <field name="freight_by_contractor" invisible="1" />
+              <field name="freight_amount" invisible="freight_by_contractor" />
+              <field name="currency_id" invisible="1" />
+            </group>
+          </group>
+          <group>
+            <field name="queue_day" />
+            <field name="queue_number" />
+            <field name="entry_at" />
+            <field name="exit_at" />
+          </group>
+          <notebook>
+            <page string="انتظامات">
+              <field name="gate_check_ids">
+                <list editable="bottom" create="0" delete="0">
+                  <field name="checkpoint_id" readonly="1" />
+                  <field name="state" />
+                  <field name="notes" />
+                  <field name="user_id" />
+                  <field name="checked_at" />
+                </list>
+              </field>
+            </page>
+            <page string="اسناد باسکول">
+              <field name="document_ids" readonly="1">
+                <list>
+                  <field name="name" />
+                  <field name="accepted_kg" />
+                  <field name="picking_id" />
+                  <field name="state" />
+                </list>
+              </field>
+            </page>
+          </notebook>
+        </sheet>
+        <chatter />
+      </form>
+    </field>
+  </record>
+  <record id="document_list" model="ir.ui.view">
+    <field name="name">megasanj.document.list</field>
+    <field name="model">megasanj.document</field>
+    <field name="arch" type="xml">
+      <list create="0" delete="0" decoration-warning="state in ['draft','pending','ready','gross','tare','quality']" decoration-muted="state == 'void'">
+        <field name="name" />
+        <field name="category_id" />
+        <field name="movement_type" />
+        <field name="waybill_id" />
+        <field name="production_id" />
+        <field name="driver_name" />
+        <field name="trailer_plate" />
+        <field name="tare_kg" />
+        <field name="gross_kg" />
+        <field name="net_kg" />
+        <field name="accepted_kg" sum="وزن پذیرفته" />
+        <field name="picking_id" />
+        <field name="state" />
+        <field name="effect" />
+      </list>
+    </field>
+  </record>
+  <record id="document_form" model="ir.ui.view">
+    <field name="name">megasanj.document.form</field>
+    <field name="model">megasanj.document</field>
+    <field name="arch" type="xml">
+      <form create="0" delete="0">
+        <header>
+          <button name="action_skip_quality" type="object" string="ثبت بدون QC (سیاست اختیاری)" invisible="state != 'quality' or qc_required" groups="megasanj.group_operator" />
+          <field name="qc_required" invisible="1" />
+          <button name="action_post" type="object" string="ثبت / تطبیق گردش اودو" class="btn-primary" invisible="state in ['posted','void','draft','gross','tare','quality']" groups="megasanj.group_operator" />
+          <button name="action_void" type="object" string="ابطال با برگشت" groups="megasanj.group_manager" invisible="state == 'void'" confirm="برگشت سند و وابستگی‌ها بررسی و ثبت می‌شود. ادامه می‌دهید؟" />
+          <field name="state" widget="statusbar" />
+        </header>
+        <sheet>
+          <h1>
+            <field name="name" readonly="1" />
+          </h1>
+          <div role="status" class="alert alert-info">
+            <field name="weight_note" readonly="1" nolabel="1" />
+          </div>
+          <div role="status" class="alert alert-warning" invisible="not error">
+            <field name="error" readonly="1" />
+          </div>
+          <group>
+            <group>
+              <field name="category_id" readonly="1" />
+              <field name="movement_type" readonly="1" />
+              <field name="policy_id" readonly="1" />
+              <field name="waybill_id" readonly="1" />
+              <field name="quality_id" readonly="1" groups="quality.group_quality_user" />
+              <field name="picking_id" />
+              <field name="production_id" readonly="1" />
+            </group>
+            <group>
+              <field name="source_id" readonly="1" />
+              <field name="destination_id" readonly="1" />
+              <field name="driver_name" readonly="1" />
+              <field name="driver_phone" readonly="1" />
+              <field name="trailer_plate" readonly="1" />
+              <field name="workflow_version" readonly="1" />
+              <field name="gross_kg" readonly="1" />
+              <field name="tare_kg" readonly="1" />
+              <field name="net_kg" readonly="1" />
+              <field name="original_kg" readonly="1" />
+              <field name="accepted_kg" readonly="1" />
+              <field name="loss_kg" readonly="1" />
+              <field name="rejected_kg" readonly="1" />
+            </group>
+          </group>
+          <notebook>
+            <page string="اقلام">
+              <field name="line_ids">
+                <list editable="bottom" create="0" delete="0">
+                  <field name="product_id" readonly="1" />
+                  <field name="percentage" readonly="1" />
+                  <field name="weight_kg" readonly="1" />
+                  <field name="lot_id" domain="[('product_id','=',product_id)]" readonly="parent.state in ['posted','void']" />
+                  <field name="consumption_move_id" />
+                </list>
+              </field>
+            </page>
+            <page string="پیگیری">
+              <group>
+                <field name="discrepancy_id" />
+                <field name="effect" readonly="1" />
+                <field name="posted_at" />
+                <field name="event_id" readonly="1" />
+                <field name="return_picking_id" />
+                <field name="void_reason" groups="megasanj.group_manager" />
+              </group>
+              <field name="move_ids" readonly="1" />
+            </page>
+            <page string="کنترل کیفیت" groups="quality.group_quality_user">
+              <field name="quality_request_ids" readonly="1">
+                <list>
+                  <field name="name" />
+                  <field name="ms_code" />
+                  <field name="ms_state" />
+                </list>
+              </field>
+            </page>
+          </notebook>
+        </sheet>
+        <chatter />
+      </form>
+    </field>
+  </record>
+  <record id="discrepancy_list" model="ir.ui.view">
+    <field name="name">megasanj.discrepancy.list</field>
+    <field name="model">megasanj.discrepancy</field>
+    <field name="arch" type="xml">
+      <list create="0" delete="0">
+        <field name="name" />
+        <field name="document_id" />
+        <field name="origin_kg" />
+        <field name="destination_kg" />
+        <field name="tolerance_kg" />
+        <field name="penalty_weight_kg" />
+        <field name="state" />
+      </list>
+    </field>
+  </record>
+  <record id="discrepancy_form" model="ir.ui.view">
+    <field name="name">megasanj.discrepancy.form</field>
+    <field name="model">megasanj.discrepancy</field>
+    <field name="arch" type="xml">
+      <form create="0" delete="0">
+        <header>
+          <button name="action_close" type="object" string="ثبت نتیجه رسیدگی" class="btn-primary" invisible="state == 'closed'" />
+          <field name="state" widget="statusbar" />
+        </header>
+        <sheet>
+          <h1>
+            <field name="name" />
+          </h1>
+          <group>
+            <field name="document_id" readonly="1" />
+            <field name="origin_kg" readonly="1" />
+            <field name="destination_kg" readonly="1" />
+            <field name="tolerance_kg" readonly="1" />
+            <field name="penalty_weight_kg" readonly="state == 'closed'" />
+            <field name="deduction_reason" readonly="state == 'closed'" />
+            <field name="driver_national_id" readonly="state == 'closed'" />
+            <field name="reviewed_by" />
+            <field name="reviewed_at" />
+          </group>
+        </sheet>
+        <chatter />
+      </form>
+    </field>
+  </record>
+  <record id="freight_list" model="ir.ui.view">
+    <field name="name">megasanj.freight.list</field>
+    <field name="model">megasanj.freight</field>
+    <field name="arch" type="xml">
+      <list create="0" delete="0">
+        <field name="name" />
+        <field name="document_id" />
+        <field name="partner_id" />
+        <field name="amount" />
+        <field name="penalty_weight_kg" />
+        <field name="payable" />
+        <field name="state" />
+        <field name="bill_id" />
+      </list>
+    </field>
+    <field name="active" eval="False" />
+  </record>
+  <record id="freight_form" model="ir.ui.view">
+    <field name="name">megasanj.freight.form</field>
+    <field name="model">megasanj.freight</field>
+    <field name="arch" type="xml">
+      <form create="0" delete="0">
+        <header>
+          <button name="action_approve" type="object" string="تأیید و ایجاد صورتحساب کرایه" groups="megasanj.group_finance" class="btn-primary" invisible="state != 'pending'" />
+          <field name="state" widget="statusbar" />
+        </header>
+        <sheet>
+          <group>
+            <field name="name" readonly="1" />
+            <field name="document_id" readonly="1" />
+            <field name="partner_id" readonly="1" />
+            <field name="amount" readonly="1" />
+            <field name="penalty_weight_kg" readonly="1" />
+            <field name="load_returned" readonly="1" />
+            <field name="payable" />
+            <field name="currency_id" />
+            <field name="bill_id" />
+          </group>
+          <div role="status" class="alert alert-info">تأیید، صورتحساب پیش‌نویس اودو می‌سازد؛ به معنی پرداخت بانکی نیست.</div>
+        </sheet>
+        <chatter />
+      </form>
+    </field>
+    <field name="active" eval="False" />
+  </record>
+  <record id="quality_point_percentage" model="ir.ui.view">
+    <field name="name">quality.point.megasanj</field>
+    <field name="model">quality.point</field>
+    <field name="inherit_id" ref="quality.quality_point_view_form" />
+    <field name="arch" type="xml">
+      <xpath expr="//sheet" position="inside">
+        <group string="کنترل کیفیت درصدی محموله" invisible="test_type != 'megasanj_percentage'">
+          <field name="ms_category_id" />
+          <field name="ms_loss" />
+          <field name="ms_rejected" />
+          <field name="ms_line_ids">
+            <list editable="bottom">
+              <field name="product_id" domain="[('categ_id','=',parent.ms_category_id),('ms_weighable','=',True)]" />
+              <field name="percentage" sum="مجموع درصد" />
+            </list>
+          </field>
+          <div role="status" class="alert alert-info">مجموع ترکیب باید دقیقاً ۱۰۰٪ و مجموع افت و برگشتی کمتر از ۱۰۰٪ باشد.</div>
+        </group>
+      </xpath>
+    </field>
+  </record>
+  <record id="quality_check_percentage" model="ir.ui.view">
+    <field name="name">quality.check.megasanj</field>
+    <field name="model">quality.check</field>
+    <field name="inherit_id" ref="quality_control.quality_check_view_form" />
+    <field name="arch" type="xml">
+      <xpath expr="//sheet" position="inside">
+        <group string="کیفیت درصدی مگاسنج" invisible="test_type != 'megasanj_percentage'">
+          <field name="ms_weighbridge_id" readonly="1" />
+          <field name="ms_waybill_id" />
+          <field name="ms_driver_name" />
+          <field name="ms_driver_phone" />
+          <field name="ms_trailer_plate" />
+          <field name="ms_net_kg" />
+          <field name="ms_code" />
+          <field name="ms_category_id" readonly="ms_state != 'draft'" />
+          <field name="ms_state" readonly="1" />
+          <field name="ms_loss" readonly="ms_state != 'draft'" />
+          <field name="ms_rejected" readonly="ms_state != 'draft'" />
+          <field name="ms_line_ids" readonly="ms_state != 'draft'">
+            <list editable="bottom">
+              <field name="product_id" domain="[('categ_id','=',parent.ms_category_id),('ms_weighable','=',True)]" />
+              <field name="percentage" sum="مجموع درصد" />
+              <field name="weight_kg" />
+            </list>
+          </field>
+          <field name="ms_document_id" />
+          <button name="action_ms_release" type="object" string="تأیید کیفیت و آزادسازی کد توزین" class="btn-primary" invisible="ms_state != 'draft'" />
+          <button name="action_ms_reopen" type="object" string="بازگشت به ارزیابی" invisible="ms_state != 'available'" />
+          <button name="action_ms_cancel" type="object" string="لغو کد کیفیت" invisible="ms_state in ['attached','cancelled']" />
+        </group>
+      </xpath>
+    </field>
+  </record>
+  <record id="category_form_ms" model="ir.ui.view">
+    <field name="name">product.category.megasanj</field>
+    <field name="model">product.category</field>
+    <field name="inherit_id" ref="product.product_category_form_view" />
+    <field name="arch" type="xml">
+      <xpath expr="//sheet" position="inside">
+        <group string="مگاسنج">
+          <field name="ms_enabled" />
+          <field name="ms_code" invisible="not ms_enabled" />
+          <field name="ms_policy_id" invisible="not ms_enabled" />
+          <field name="ms_policy_ids" invisible="not ms_enabled">
+            <list>
+              <field name="version" />
+              <field name="calculator" />
+              <field name="quality_enabled" />
+              <field name="quality_required" />
+              <field name="tolerance_kg" />
+              <field name="state" />
+            </list>
+          </field>
+        </group>
+      </xpath>
+    </field>
+  </record>
+  <record id="product_form_ms" model="ir.ui.view">
+    <field name="name">product.template.megasanj</field>
+    <field name="model">product.template</field>
+    <field name="inherit_id" ref="product.product_template_only_form_view" />
+    <field name="arch" type="xml">
+      <xpath expr="//field[@name='categ_id']" position="after">
+        <field name="ms_weighable" />
+      </xpath>
+    </field>
+  </record>
+  <record id="location_form_ms" model="ir.ui.view">
+    <field name="name">stock.location.megasanj</field>
+    <field name="model">stock.location</field>
+    <field name="inherit_id" ref="stock.view_location_form" />
+    <field name="arch" type="xml">
+      <xpath expr="//sheet" position="inside">
+        <group string="باسکول مگاسنج">
+          <field name="ms_category_id" />
+          <field name="ms_receiving_default" />
+        </group>
+      </xpath>
+    </field>
+  </record>
+  <record id="company_form_ms" model="ir.ui.view">
+    <field name="name">res.company.megasanj</field>
+    <field name="model">res.company</field>
+    <field name="inherit_id" ref="base.view_company_form" />
+    <field name="arch" type="xml">
+      <xpath expr="//sheet" position="inside">
+        <group string="مگاسنج">
+          <field name="ms_freight_product_id" />
+        </group>
+      </xpath>
+    </field>
+  </record>
+  <record id="checkpoint_list" model="ir.ui.view">
+    <field name="name">megasanj.checkpoint.list</field>
+    <field name="model">megasanj.checkpoint</field>
+    <field name="arch" type="xml">
+      <list editable="bottom">
+        <field name="name" />
+        <field name="company_id" />
+        <field name="required" />
+        <field name="active" />
+      </list>
+    </field>
+  </record>
+  <record id="eligibility_list" model="ir.ui.view">
+    <field name="name">megasanj.eligibility.list</field>
+    <field name="model">megasanj.eligibility</field>
+    <field name="arch" type="xml">
+      <list editable="bottom">
+        <field name="partner_id" />
+        <field name="category_id" />
+        <field name="company_id" />
+        <field name="active" />
+      </list>
+    </field>
+  </record>
+  <record id="processing_list" model="ir.ui.view">
+    <field name="name">megasanj.processing.list</field>
+    <field name="model">megasanj.processing</field>
+    <field name="arch" type="xml">
+      <list create="0" edit="0" delete="0">
+        <field name="name" />
+        <field name="event_id" />
+        <field name="production_id" />
+        <field name="create_date" />
+      </list>
+    </field>
+  </record>
+  <record id="action_documents" model="ir.actions.act_window">
+    <field name="name">اسناد باسکول</field>
+    <field name="res_model">megasanj.document</field>
+    <field name="view_mode">list,form</field>
+  </record>
+  <record id="action_waybills" model="ir.actions.act_window">
+    <field name="name">بارنامه و ورود محموله</field>
+    <field name="res_model">megasanj.waybill</field>
+    <field name="view_mode">list,form</field>
+  </record>
+  <record id="action_queue" model="ir.actions.act_window">
+    <field name="name">صف انتظار و انتظامات</field>
+    <field name="res_model">megasanj.waybill</field>
+    <field name="view_mode">list,form</field>
+    <field name="domain">[('gate_state','!=','exited'),('state','!=','cancelled')]</field>
+  </record>
+  <record id="action_discrepancies" model="ir.actions.act_window">
+    <field name="name">عدم تطابق وزن</field>
+    <field name="res_model">megasanj.discrepancy</field>
+    <field name="view_mode">list,form</field>
+  </record>
+  <record id="action_policies" model="ir.actions.act_window">
+    <field name="name">سیاست‌های پذیرش</field>
+    <field name="res_model">megasanj.policy</field>
+    <field name="view_mode">list,form</field>
+  </record>
+  <record id="quality_search_ms" model="ir.ui.view">
+    <field name="name">quality.check.megasanj.search</field>
+    <field name="model">quality.check</field>
+    <field name="arch" type="xml">
+      <search>
+        <field name="name" />
+        <field name="ms_code" />
+        <field name="picking_id" />
+        <field name="ms_driver_name" />
+        <field name="ms_trailer_plate" />
+        <filter name="ms_pending" string="در انتظار کنترل کیفیت" domain="[('ms_state','=','draft')]" />
+        <filter name="ms_ready" string="کیفیت تکمیل‌شده" domain="[('ms_state','in',['available','attached'])]" />
+      </search>
+    </field>
+  </record>
+  <record id="quality_list_ms" model="ir.ui.view">
+    <field name="name">quality.check.megasanj.list</field>
+    <field name="model">quality.check</field>
+    <field name="arch" type="xml">
+      <list>
+        <field name="name" />
+        <field name="ms_code" />
+        <field name="picking_id" />
+        <field name="ms_weighbridge_id" />
+        <field name="ms_waybill_id" />
+        <field name="ms_driver_name" />
+        <field name="ms_trailer_plate" />
+        <field name="ms_net_kg" />
+        <field name="ms_loss" />
+        <field name="ms_rejected" />
+        <field name="ms_state" />
+      </list>
+    </field>
+  </record>
+  <record id="action_quality" model="ir.actions.act_window">
+    <field name="search_view_id" ref="quality_search_ms" />
+    <field name="view_id" ref="quality_list_ms" />
+    <field name="name">کنترل کیفیت محموله</field>
+    <field name="res_model">quality.check</field>
+    <field name="view_mode">list,form</field>
+    <field name="domain">[('test_type','=','megasanj_percentage')]</field>
+    <field name="context" eval="{'default_test_type_id':ref('test_type_percentage'),'search_default_ms_pending':1}" />
+  </record>
+  <record id="action_points" model="ir.actions.act_window">
+    <field name="name">نقاط کنترل کیفیت</field>
+    <field name="res_model">quality.point</field>
+    <field name="view_mode">list,form</field>
+  </record>
+  <record id="action_freight" model="ir.actions.act_window">
+    <field name="name">صورتحساب‌های حمل</field>
+    <field name="res_model">account.move</field>
+    <field name="view_mode">list,form</field>
+    <field name="domain">[('move_type','in',['in_invoice','in_refund']),('invoice_line_ids.product_id.default_code','=','MS-FREIGHT-SERVICE')]</field>
+    <field name="context">{'default_move_type':'in_invoice'}</field>
+  </record>
+  <record id="action_checkpoints" model="ir.actions.act_window">
+    <field name="name">چک‌پوینت انتظامات</field>
+    <field name="res_model">megasanj.checkpoint</field>
+    <field name="view_mode">list,form</field>
+  </record>
+  <record id="action_eligibility" model="ir.actions.act_window">
+    <field name="name">صلاحیت تأمین‌کنندگان</field>
+    <field name="res_model">megasanj.eligibility</field>
+    <field name="view_mode">list,form</field>
+  </record>
+  <record id="action_categories" model="ir.actions.act_window">
+    <field name="name">انواع محموله</field>
+    <field name="res_model">product.category</field>
+    <field name="view_mode">list,form</field>
+    <field name="domain">[('ms_enabled','=',True)]</field>
+    <field name="context">{'default_ms_enabled':True}</field>
+  </record>
+  <record id="action_locations" model="ir.actions.act_window">
+    <field name="name">محل‌های انبار باسکول</field>
+    <field name="res_model">stock.location</field>
+    <field name="view_mode">list,form</field>
+    <field name="domain">[('usage','=','internal')]</field>
+  </record>
+  <record id="action_processing" model="ir.actions.act_window">
+    <field name="name">فرآوری و سفارش ساخت</field>
+    <field name="res_model">megasanj.processing</field>
+    <field name="view_mode">list,form</field>
+  </record>
+  <menuitem id="menu_root" name="مگاسنج" web_icon="megasanj,static/description/icon.png" sequence="25" groups="group_operator,group_gate,group_finance,quality.group_quality_user" />
+  <menuitem id="menu_documents" name="اسناد باسکول" parent="menu_root" action="action_documents" sequence="10" groups="group_operator,group_gate" />
+  <menuitem id="menu_waybills" name="بارنامه‌ها" parent="menu_root" action="action_waybills" sequence="20" groups="group_operator,group_gate" />
+  <menuitem id="menu_queue" name="صف و مجوز خروج" parent="menu_root" action="action_queue" sequence="30" groups="group_operator,group_gate" />
+  <menuitem id="menu_quality" name="کیفیت درصدی" parent="menu_root" action="action_quality" sequence="40" groups="group_operator,quality.group_quality_user" />
+  <menuitem id="menu_discrepancies" name="عدم تطابق وزن" parent="menu_root" action="action_discrepancies" sequence="50" groups="group_operator,group_gate" />
+  <menuitem id="menu_processing" name="فرآوری" parent="menu_root" action="action_processing" sequence="60" groups="group_operator" />
+  <menuitem id="menu_freight" name="صورتحساب‌های حمل" parent="menu_root" action="action_freight" sequence="70" groups="group_finance" />
+  <menuitem id="menu_settings" name="پیکربندی" parent="menu_root" sequence="90" groups="group_manager" />
+  <menuitem id="menu_categories" name="انواع محموله" parent="menu_settings" action="action_categories" />
+  <menuitem id="menu_policies" name="سیاست پذیرش" parent="menu_settings" action="action_policies" />
+  <menuitem id="menu_points" name="نقاط کنترل" parent="menu_settings" action="action_points" />
+  <menuitem id="menu_locations" name="محل‌های انبار" parent="menu_settings" action="action_locations" />
+  <menuitem id="menu_checkpoints" name="چک‌پوینت انتظامات" parent="menu_settings" action="action_checkpoints" />
+  <menuitem id="menu_eligibility" name="صلاحیت تأمین‌کننده" parent="menu_settings" action="action_eligibility" />
+  <record id="purchase_form_ms_freight" model="ir.ui.view">
+    <field name="name">purchase.order.megasanj.freight</field>
+    <field name="model">purchase.order</field>
+    <field name="inherit_id" ref="purchase.purchase_order_form" />
+    <field name="arch" type="xml">
+      <xpath expr="//field[@name='partner_ref']" position="after">
+        <field name="ms_freight_by_contractor" readonly="state == 'cancel'" />
+      </xpath>
+    </field>
+  </record>
+  <menuitem id="menu_landed_costs" name="هزینه‌های جانبی خرید" parent="menu_root" action="stock_landed_costs.action_stock_landed_cost" sequence="71" groups="stock.group_stock_manager" />
+  <record id="purchase_line_freight_waybill" model="ir.ui.view">
+    <field name="name">purchase.order.megasanj.freight.link</field>
+    <field name="model">purchase.order</field>
+    <field name="inherit_id" ref="purchase.purchase_order_form" />
+    <field name="arch" type="xml">
+      <xpath expr="//field[@name='order_line']/list/field[@name='product_id']" position="after">
+        <field name="ms_waybill_id" optional="hide" readonly="1" />
+      </xpath>
+    </field>
+  </record>
+</odoo>

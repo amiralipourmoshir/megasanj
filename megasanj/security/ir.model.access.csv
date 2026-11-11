@@ -1,0 +1,39 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+policy_read,policy read,model_megasanj_policy,base.group_user,1,0,0,0
+policy_manage,policy manage,model_megasanj_policy,group_manager,1,1,1,1
+eligibility_read,eligibility read,model_megasanj_eligibility,base.group_user,1,0,0,0
+eligibility_manage,eligibility manage,model_megasanj_eligibility,group_manager,1,1,1,1
+waybill_operator,waybill operator,model_megasanj_waybill,group_operator,1,1,0,0
+waybill_gate,waybill gate,model_megasanj_waybill,group_gate,1,1,1,0
+document_operator,document operator,model_megasanj_document,group_operator,1,1,1,0
+document_gate,document gate,model_megasanj_document,group_gate,1,0,0,0
+document_finance,document finance,model_megasanj_document,group_finance,1,0,0,0
+line_operator,line operator,model_megasanj_document_line,group_operator,1,1,1,0
+line_gate,line gate,model_megasanj_document_line,group_gate,1,0,0,0
+quality_line_user,quality line user,model_megasanj_quality_line,quality.group_quality_user,1,1,1,1
+discrepancy_operator,discrepancy operator,model_megasanj_discrepancy,group_operator,1,1,1,0
+discrepancy_gate,discrepancy gate,model_megasanj_discrepancy,group_gate,1,0,0,0
+discrepancy_finance,discrepancy finance,model_megasanj_discrepancy,group_finance,1,0,0,0
+checkpoint_read,checkpoint read,model_megasanj_checkpoint,base.group_user,1,0,0,0
+checkpoint_manager,checkpoint manager,model_megasanj_checkpoint,group_manager,1,1,1,0
+gate_check_gate,gate check gate,model_megasanj_gate_check,group_gate,1,1,1,0
+gate_check_operator,gate check operator,model_megasanj_gate_check,group_operator,1,0,0,0
+freight_operator,freight operator,model_megasanj_freight,group_operator,1,0,0,0
+freight_finance,freight finance,model_megasanj_freight,group_finance,1,0,0,0
+processing_operator,processing operator,model_megasanj_processing,group_operator,1,1,1,0
+token_no_rpc,token no rpc,model_megasanj_token,base.group_user,0,0,0,0
+
+document_quality,document quality,model_megasanj_document,quality.group_quality_user,1,0,0,0
+waybill_quality,waybill quality,model_megasanj_waybill,quality.group_quality_user,1,0,0,0
+line_quality,line quality,model_megasanj_document_line,quality.group_quality_user,1,0,0,0
+discrepancy_quality,discrepancy quality,model_megasanj_discrepancy,quality.group_quality_user,1,0,0,0
+
+freight_account_read,freight accounting read,model_megasanj_freight,account.group_account_invoice,1,0,0,0
+document_account_read,document accounting read,model_megasanj_document,account.group_account_invoice,1,0,0,0
+waybill_account_read,waybill accounting read,model_megasanj_waybill,account.group_account_invoice,1,0,0,0
+discrepancy_account_read,discrepancy accounting read,model_megasanj_discrepancy,account.group_account_invoice,1,0,0,0
+line_account_read,line accounting read,model_megasanj_document_line,account.group_account_invoice,1,0,0,0
+waybill_purchase_read,waybill purchase read,model_megasanj_waybill,purchase.group_purchase_user,1,0,0,0
+document_purchase_read,document purchase read,model_megasanj_document,purchase.group_purchase_user,1,0,0,0
+line_purchase_read,line purchase read,model_megasanj_document_line,purchase.group_purchase_user,1,0,0,0
+gate_check_purchase_read,gate_check purchase read,model_megasanj_gate_check,purchase.group_purchase_user,1,0,0,0

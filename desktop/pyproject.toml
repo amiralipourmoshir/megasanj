@@ -1,0 +1,19 @@
+[project]
+name = "megasanj-odoo"
+version = "1.0.0"
+description = "Odoo 19 edition of MegaSanj, sharing the scale, print and outbox core"
+requires-python = ">=3.10"
+dependencies = ["megafoolad-weighbridge==3.0.0"]
+
+[project.scripts]
+megasanj-odoo = "megasanj_odoo:main"
+
+[build-system]
+requires = ["setuptools>=69"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+megasanj_odoo = ["assets/*.png", "assets/*.ico"]

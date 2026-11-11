@@ -1,0 +1,85 @@
+<odoo>
+  <record id="purchase_form_ms_links" model="ir.ui.view">
+    <field name="name">purchase.order.megasanj.links</field>
+    <field name="model">purchase.order</field>
+    <field name="inherit_id" ref="purchase.purchase_order_form" />
+    <field name="arch" type="xml">
+      <xpath expr="//header" position="inside">
+        <button name="action_ms_return_all" type="object" string="مرجوع کامل بارهای مگاسنج" groups="megasanj.group_manager" invisible="not ms_waybill_ids or ms_returned" confirm="تمام بارهای مرتبط با گردش استاندارد انبار برگشت می‌خورند؛ اسناد کرایه برای تعیین تکلیف مالی باقی می‌مانند. ادامه می‌دهید؟" />
+      </xpath>
+      <xpath expr="//notebook" position="inside">
+        <page string="بارنامه‌ها و توزین مگاسنج">
+          <field name="ms_returned" readonly="1" />
+          <field name="ms_waybill_ids" readonly="1">
+            <list create="0" delete="0">
+              <field name="name" />
+              <field name="driver_name" />
+              <field name="driver_partner_id" />
+              <field name="trailer_plate" />
+              <field name="picking_id" />
+              <field name="state" />
+              <field name="ms_returned" />
+            </list>
+          </field>
+        </page>
+      </xpath>
+    </field>
+  </record>
+  <record id="waybill_form_ms_returned" model="ir.ui.view">
+    <field name="name">megasanj.waybill.returned</field>
+    <field name="model">megasanj.waybill</field>
+    <field name="inherit_id" ref="waybill_form" />
+    <field name="arch" type="xml">
+      <xpath expr="//field[@name='state']" position="after">
+        <field name="ms_returned" readonly="1" />
+      </xpath>
+    </field>
+  </record>
+  <record id="document_form_ms_returned" model="ir.ui.view">
+    <field name="name">megasanj.document.returned</field>
+    <field name="model">megasanj.document</field>
+    <field name="inherit_id" ref="document_form" />
+    <field name="arch" type="xml">
+      <xpath expr="//field[@name='effect']" position="after">
+        <field name="ms_returned" readonly="1" />
+      </xpath>
+    </field>
+  </record>
+  <record id="account_move_ms_freight" model="ir.ui.view">
+    <field name="name">account.move.megasanj.freight</field>
+    <field name="model">account.move</field>
+    <field name="inherit_id" ref="account.view_move_form" />
+    <field name="arch" type="xml">
+      <xpath expr="//sheet/notebook" position="before">
+        <group string="کرایه حمل مگاسنج" invisible="not ms_freight_id">
+          <field name="ms_freight_id" />
+          <field name="ms_load_returned" />
+          <field name="ms_penalty_weight_kg" />
+          <field name="ms_freight_deduction" invisible="ms_penalty_weight_kg &lt;= 0" readonly="state != 'draft'" />
+          <field name="ms_freight_deduction_reason" invisible="ms_penalty_weight_kg &lt;= 0" readonly="state != 'draft'" />
+        </group>
+      </xpath>
+    </field>
+    <field name="active" eval="False" />
+  </record>
+  <record id="quality_form_ms_returned" model="ir.ui.view">
+    <field name="name">quality.check.megasanj.returned</field>
+    <field name="model">quality.check</field>
+    <field name="inherit_id" ref="quality_check_percentage" />
+    <field name="arch" type="xml">
+      <xpath expr="//field[@name='ms_weighbridge_id']" position="after">
+        <field name="ms_load_returned" />
+      </xpath>
+    </field>
+  </record>
+  <record id="discrepancy_form_ms_returned" model="ir.ui.view">
+    <field name="name">megasanj.discrepancy.returned</field>
+    <field name="model">megasanj.discrepancy</field>
+    <field name="inherit_id" ref="discrepancy_form" />
+    <field name="arch" type="xml">
+      <xpath expr="//field[@name='document_id']" position="after">
+        <field name="ms_load_returned" readonly="1" />
+      </xpath>
+    </field>
+  </record>
+</odoo>

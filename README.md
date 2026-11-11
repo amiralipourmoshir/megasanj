@@ -1,0 +1,1 @@
+# MegaSanj for Odoo 19`n`n- `megasanj-odoo19.zip`: Odoo addon package. Extract `megasanj` into your Odoo custom addons path and update the Apps list.`n- `MegaSanj-Odoo-Desktop-Windows.zip`: Windows desktop application for Odoo.
